@@ -6,20 +6,57 @@ var vod_lastIPNumMin = 2;
 var vod_lastIPNumMax = 254;
 var found = 0;
 var fails = 0;
+var start = false;
 
 function log(msg) {
-    var text = $('#result').html();
+    var text = $('#log').html();
     text += '<p>'+msg+'</p>';
-    $('#result').html(text);
+    $('#log').html(text);
 }
 
 function addLink(link) {
-    var text = $('#result').html();
-    text += '<h1><a href=\"http://'+link+'\">'+link+'</a></h1>\n';
-    $('#result').html(text);
+    var text = $('#log').html();
+    text += '<h1><a href="'+link+'" target="_blank">'+link+'</a></h1>';
+    $('#log').html(text);
+}
+
+function updateProgress() {
+    var percent = Math.floor((fails + found) * 100 / (vod_lastIPNumMax - vod_lastIPNumMin + 1));
+    $('#progress').html('Progress: '+percent.toString()+'%');
+    if (percent == 100) {
+        start = false;
+        $('#start').removeClass('hl');
+    }
+}
+
+function onImageError(element) {
+    fails = fails + 1;
+    updateProgress();
+}
+
+function onImageLoad(element) {
+    var vod = element.src.match(/(.*)vod/);
+    addLink(vod[0]);
+    found = found + 1;
+    $('#found').html('Found: '+found.toString());
+    updateProgress();
+}
+
+function scanVOD(ip) {
+    log('scanning '+ip+'/255.255.255.0');
+    var ip_nums = ip.split('.');
+    var prefix = ip_nums[0] + '.' + ip_nums[1] + '.' + ip_nums[2] + '.';
+    var text = '';
+    for (var i = vod_lastIPNumMin; i <= vod_lastIPNumMax; i++) {
+        var link = prefix + i.toString() + vod_path + vod_png + '?' + new Date().getTime();
+        text += '<img src="http://'+link+'" onload="onImageLoad(this)" onerror="onImageError(this)" \>';
+    }
+    $('#images').html(text);
 }
 
 function ping(ip, callback, timeout = 0) {
+
+    console.log('ping : '+ip);
 
     if (!this.inUse) {
         this.status = 'unchecked';
@@ -54,36 +91,6 @@ function ping(ip, callback, timeout = 0) {
     }
 }
 
-function redirect(ip) {
-    var re = new RegExp(vod_png);
-    var vod = ip.replace(re, '');
-    //localStorage.setItem('vod', vod);
-    addLink(vod);
-    found = found + 1;
-}
-
-function onScanResult(ip, status) {
-    if (status == 'load') {
-        redirect(ip);
-    } else {
-        fails = fails + 1;
-        console.log([ip, status, fails.toString()].join(','));
-        if (fails == (vod_lastIPNumMax - vod_lastIPNumMin + 1 - found)) {
-            log('Found : '+found.toString());
-        }
-    }
-}
-
-function scanVOD(ip) {
-    log('scanning '+ip+'/255.255.255.0');
-    var ip_nums = ip.split('.');
-    var prefix = ip_nums[0] + '.' + ip_nums[1] + '.' + ip_nums[2] + '.';
-    for (var i = vod_lastIPNumMin; i <= vod_lastIPNumMax; i++) {
-        new ping(prefix+i.toString()+vod_path+vod_png, onScanResult);
-    }
-
-}
-
 function onGatewayResult(ip, status) {
     if (status != 'timeout') {
         scanVOD(ip);
@@ -92,23 +99,17 @@ function onGatewayResult(ip, status) {
 
 function findGateway() {
     for (var i=0; i<gateways.length; i++) {
-        new ping(gateways[i], onGatewayResult, 1000);
+        new ping(gateways[i], onGatewayResult, 1500);
     }
 }
 
-function checkVOD(ip, status) {
-    if (status == 'load') {
-        redirect(ip);
-    } else {
+function findVOD() {
+    if (!start) {
+        start = true;
+        found = fails = 0;
+        $('#log').html('');
+        $('#start').addClass('hl');
         findGateway();
     }
 }
 
-function findVOD_main () {
-    var vod = localStorage.getItem('vod');
-    if (vod && vod.length > 0) {
-        new ping(vod+vod_png, checkVOD);
-    } else {
-        findGateway();
-    }
-}

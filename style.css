@@ -1,7 +1,35 @@
-.result {
+
+.menubar {
     font-size: 32px;
-    width: 90vw;
+    width: 80vw;
+    margin: 16px auto;
+}
+
+.opt {
+    font-size: 32px;
     border: 2px solid white;
     padding: 16px;
-    margin: auto; 
 }
+
+.btn {
+    font-size: 32px;
+    border: 2px solid white;
+    background-color: black;
+    color: white;
+    text-align: center;
+    width: 128px;
+    padding: 16px;
+}
+
+.hl {
+    color: red;
+}
+
+.log {
+    font-size: 32px;
+    width: 80vw;
+    border: 2px solid white;
+    padding: 16px;
+    margin: 16px auto;
+}
+
