@@ -7,6 +7,7 @@ var vod_lastIPNumMax = 254;
 var found = 0;
 var fails = 0;
 var start = false;
+var redirect = false;
 
 function log(msg) {
     var text = $('#log').html();
@@ -35,7 +36,12 @@ function onImageError(element) {
 }
 
 function onImageLoad(element) {
-    var vod = element.src.match(/(.*)vod/);
+    var vod = element.src.match(/(.*)vod\//)[0];
+    if (redirect) {
+        localStorage.setItem('vod', vod);
+        window.location = vod;
+        return;
+    }
     addLink(vod[0]);
     found = found + 1;
     $('#found').html('Found: '+found.toString());
@@ -113,3 +119,14 @@ function findVOD() {
     }
 }
 
+function onAuto() {
+    redirect = true;
+    var vod = localStorage.getItem('vod');
+    if (vod && vod.length > 0) {
+        var link = vod + vod_png + '?' + new Date().getTime();
+        var text = '<img src="'+link+'" onload="onImageLoad(this)" onerror="findVOD()" \>';
+        $('#images').html(text);
+    } else {
+        findVOD();
+    }
+}

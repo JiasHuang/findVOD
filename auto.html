@@ -1,0 +1,32 @@
+<html>
+
+<head>
+<meta charset="UTF-8">
+
+<title>findVOD</title>
+
+<link rel="stylesheet" href="style.css">
+
+<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+<script type="text/javascript" src="findVOD.js"></script>
+
+<script type="text/javascript">
+    window.onload = onAuto;
+</script>
+
+</head>
+
+<body bgcolor=silver>
+
+<table class="menubar"><tr>
+    <td class="opt" id="progress">Progress: 0%</td>
+    <td class="opt" id="found">Found: 0</td>
+    <td class="btn" id="start" onclick="findVOD()">START</td>
+</tr></table>
+
+<div id="log" class="log">Hello!</div>
+
+<div id="images" style="visibility:hidden"></div>
+
+</body>
+</html>
