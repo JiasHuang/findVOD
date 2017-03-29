@@ -4,7 +4,7 @@ var vod_path = '/vod/';
 var vod_image = 'mic-icon.png';
 var vod_lastIPNumMin = 2;
 var vod_lastIPNumMax = 254;
-var vod_auto = null;
+var vod_found = null;
 var found = 0;
 var fails = 0;
 var start = false;
@@ -55,7 +55,7 @@ function onImageError(element) {
 function onImageLoad(element) {
     var vod = extractDIR(element.src, vod_path)
     if (redirect) {
-        localStorage.setItem('vod', vod);
+        localStorage.setItem('vod_found', vod);
         window.location = vod;
         return;
     }
@@ -147,7 +147,7 @@ function save() {
  }
 
 function onInit() {
-    var lists = ['vod_gateways', 'vod_path', 'vod_image'];
+    var lists = ['vod_gateways', 'vod_path', 'vod_image', 'vod_found'];
     for (var i=0; i<lists.length; i++) {
         var x = localStorage.getItem(lists[i]);
         if (x && x.length > 0) {
@@ -155,15 +155,17 @@ function onInit() {
         }
     }
     for (var i=0; i<lists.length; i++) {
-        document.getElementById(lists[i]).value = this[lists[i]];
+        if (document.getElementById(lists[i])) {
+            document.getElementById(lists[i]).value = this[lists[i]];
+        }
     }
 }
 
 function onAuto() {
     onInit();
     redirect = true;
-    if (vod_auto) {
-        var link = vod_auto + vod_image + '?' + new Date().getTime();
+    if (vod_found) {
+        var link = vod_found + vod_image + '?' + new Date().getTime();
         var text = '<img src="'+link+'" onload="onImageLoad(this)" onerror="findVOD()" \>';
         $('#images').html(text);
     } else {
