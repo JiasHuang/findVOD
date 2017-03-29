@@ -18,11 +18,19 @@
 
 <body bgcolor=silver>
 
-<table class="menubar"><tr>
+<table class="menubar">
+<tr>
     <td class="opt" id="progress">Progress: 0%</td>
     <td class="opt" id="found">Found: 0</td>
     <td class="btn" id="start" onclick="findVOD()">START</td>
-</tr></table>
+</tr>
+</table>
+
+<table class="menubar">
+    <tr><th class="opt" >gateways</th><td><input type="text" class="input" id="vod_gateways" /></td></tr>
+    <tr><th class="opt" >path</th><td><input type="text" class="input" id="vod_path" /></td></tr>
+    <tr><th class="opt" >image</th><td><input type="text" class="input" id="vod_image" /></td></tr>
+</table>
 
 <div id="log" class="log">Hello!</div>
 

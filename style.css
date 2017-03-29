@@ -21,6 +21,13 @@
     padding: 16px;
 }
 
+.input {
+    font-size: 32px;
+    border: 2px solid white;
+    padding: 16px;
+    width: 100%;
+}
+
 .hl {
     color: red;
 }
