@@ -1,5 +1,4 @@
 
-var vod_gateways = '192.168.1.1, 192.168.0.1';
 var vod_path = '/vod/';
 var vod_image = 'mic-icon.png';
 var vod_lastIPNumMin = 2;
@@ -77,54 +76,18 @@ function scanVOD(ip) {
     $('#images').html(text);
 }
 
-function ping(ip, callback, timeout = 0) {
-
-    console.log('ping : '+ip);
-
-    if (!this.inUse) {
-        this.status = 'unchecked';
-        this.inUse = true;
-        this.callback = callback;
-        this.ip = ip;
-        var _that = this;
-        this.img = new Image();
-        this.img.onload = function () {
-            _that.inUse = false;
-            _that.callback(_that.ip, 'load');
-
-        };
-        this.img.onerror = function (e) {
-            if (_that.inUse) {
-                _that.inUse = false;
-                _that.callback(_that.ip, 'error');
-            }
-
-        };
-        this.start = new Date().getTime();
-        this.img.src = 'http://' + ip + '?'+ new Date().getTime();
-        if (timeout) {
-            this.timer = setTimeout(function () {
-                if (_that.inUse) {
-                    _that.inUse = false;
-                    _that.img.src = '';
-                    _that.callback(_that.ip, 'timeout');
-                }
-            }, timeout);
+function getLocalIP(callback) {
+    window.RTCPeerConnection = window.RTCPeerConnection || window.webkitRTCPeerConnection;
+    var pc = new RTCPeerConnection({iceServers:[]}), noop = function(){};
+    pc.createDataChannel('');
+    pc.createOffer(pc.setLocalDescription.bind(pc), noop);
+    pc.onicecandidate = function(ice) {
+        if(!ice || !ice.candidate || !ice.candidate.candidate)  return;
+        var myIP = /([0-9]{1,3}(\.[0-9]{1,3}){3}|[a-f0-9]{1,4}(:[a-f0-9]{1,4}){7})/.exec(ice.candidate.candidate)[1];
+        if (callback) {
+            callback(myIP);
         }
-    }
-}
-
-function onGatewayResult(ip, status) {
-    if (status != 'timeout') {
-        scanVOD(ip);
-    }
-}
-
-function findGateway() {
-    var lists = vod_gateways.replace(/\s/g, '').split(',');
-    for (var i=0; i<lists.length; i++) {
-        new ping(lists[i], onGatewayResult, 1500);
-    }
+    };
 }
 
 function findVOD() {
@@ -134,12 +97,12 @@ function findVOD() {
         found = fails = 0;
         $('#log').html('');
         $('#start').addClass('hl');
-        findGateway();
+        getLocalIP(scanVOD);
     }
 }
 
 function save() {
-    var lists = ['vod_gateways', 'vod_path', 'vod_image'];
+    var lists = ['vod_path', 'vod_image'];
     for (var i=0; i<lists.length; i++) {
         this[lists[i]] = document.getElementById(lists[i]).value;
         localStorage.setItem(lists[i], this[lists[i]]);
@@ -147,7 +110,7 @@ function save() {
  }
 
 function onInit() {
-    var lists = ['vod_gateways', 'vod_path', 'vod_image', 'vod_found'];
+    var lists = ['vod_path', 'vod_image', 'vod_found'];
     for (var i=0; i<lists.length; i++) {
         var x = localStorage.getItem(lists[i]);
         if (x && x.length > 0) {
